@@ -6,5 +6,11 @@ module.exports = {
   'smtp_host': process.env.SMTP_HOST || 'smtp.mandrillapp.com',
   'smtp_user': process.env.SMTP_USER,
   'smtp_password': process.env.SMTP_PASSWORD,
-  'smtp_from': process.env.SMTP_FROM
+  'smtp_from': process.env.SMTP_FROM,
+
+  'facebookAuth': {
+    'clientID': '237210096623804', 
+    'clientSecret': 'ad1528174b22338906519b0cb7d2351b', 
+    'callbackURL': 'http://localhost:3000/auth/facebook/callback'
+  }
 };
