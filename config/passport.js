@@ -135,35 +135,32 @@ module.exports = function (passport) {
       process.nextTick(function () {
 
         User.findOne({
-          'profileId': profile.id,
-          'type': 'twitter'
-        }, function (err, user) {
+            'profileId': profile.id,
+            'type': 'twitter'
+          })
+          .then(function (user) {
+            if (user) {
+              return done(null, user); // user found, return that user
+            } else {
 
-          if (err)
-            return done(err);
+              var newUser = new User();
+              // console.log(profile);
+              newUser.profileId = profile.id;
+              newUser.type = 'twitter';
+              newUser.name = profile.displayName;
+              newUser.email = '';  
+              // save our user into the database
+              newUser.save(function (err, saved) {
+                if (err) {
+                  done(err);
+                }
+                return done(null, saved);
+              });
+            }
+          }, function (err) {
+            done(err);
+          });
 
-          if (user) {
-            return done(null, user); // user found, return that user
-          } else {
-
-            var newUser = new User();
-
-            console.log(profile);
-
-            newUser.profileId = profile.id;
-            newUser.type = 'twitter';
-            //newUser.twitter.token = token;
-            //newUser.twitter.username = profile.username;
-            //newUser.twitter.displayName = profile.displayName;
-
-            // save our user into the database
-            newUser.save(function (err) {
-              if (err)
-                throw err;
-              return done(null, newUser);
-            });
-          }
-        });
       });
     }));
 };
