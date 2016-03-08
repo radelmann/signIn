@@ -3,7 +3,8 @@ signIn - local, facebook, and twitter authentication strategies implemented with
 
 #Instructions for running locally
 - clone repo
-- 'npm install'
+- `npm install`
 - start mongo and create db named 'signin'
 - create/intitialize all environment variables listed in config/env.js
-- 'npm start'
+- `npm start`
+- http://localhost:3000
