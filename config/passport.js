@@ -40,8 +40,9 @@ module.exports = function (passport) {
               newUser.password = newUser.generateHash(password);
 
               newUser.save(function (err, saved) {
-                if (err)
+                if (err) {
                   done(err);
+                }
                 //send welcome email
                 mail.sendWelcome(saved.email, saved.name, function (err) {
                   return done(err, newUser);
@@ -63,21 +64,22 @@ module.exports = function (passport) {
     function (req, email, password, done) {
 
       User.findOne({
-        'email': email,
-        'type': 'local'
-      }).then(function (user) {
-        if (!user) {
-          return done(null, false, req.flash('loginMessage', 'Email does not exist. Please try again.'));
-        }
+          'email': email,
+          'type': 'local'
+        })
+        .then(function (user) {
+          if (!user) {
+            return done(null, false, req.flash('loginMessage', 'Email does not exist. Please try again.'));
+          }
 
-        if (!user.validPassword(password)) {
-          return done(null, false, req.flash('loginMessage', 'Incorrect password. Please try again.'));
-        }
+          if (!user.validPassword(password)) {
+            return done(null, false, req.flash('loginMessage', 'Incorrect password. Please try again.'));
+          }
 
-        return done(null, user);
-      }, function (err) {
-        return done(err)
-      });
+          return done(null, user);
+        }, function (err) {
+          return done(err)
+        });
 
     }));
 
@@ -93,35 +95,33 @@ module.exports = function (passport) {
       process.nextTick(function () {
 
         User.findOne({
-          'profileId': profile.id,
-          'type': 'facebook'
-        }, function (err, user) {
+            'profileId': profile.id,
+            'type': 'facebook'
+          })
+          .then(function (user) {
+            if (user) {
+              return done(null, user);
+            } else {
 
-          if (err)
-            return done(err);
+              var newUser = new User();
 
-          if (user) {
-            return done(null, user);
-          } else {
+              newUser.type = 'facebook';
+              newUser.profileId = profile.id; // set facebook id                   
+              newUser.name = profile.displayName;
+              newUser.email = profile.emails[0].value;
 
-            var newUser = new User();
-            newUser.type = 'facebook';
+              newUser.save(function (err, saved) {
+                if (err) {
+                  done(err);
+                }
 
-            newUser.profileId = profile.id; // set the users facebook id                   
-            //newUser.facebook.token = token; // we will save the token that facebook provides to the user                    
-            //newUser.facebook.name = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
-            console.log(profile);
-            newUser.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first
+                return done(null, saved);
+              });
+            }
+          }, function (err) {
+            done(err);
+          });
 
-            newUser.save(function (err) {
-              if (err)
-                throw err;
-
-              return done(null, newUser);
-            });
-          }
-
-        });
       });
     }));
 
