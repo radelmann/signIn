@@ -1,5 +1,6 @@
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
+var TwitterStrategy = require('passport-twitter').Strategy;
 var User = require('../models/users.js');
 var config = require('./env.js');
 var mail = require('../config/mail.js');
@@ -25,7 +26,7 @@ module.exports = function (passport) {
 
         User.findOne({
           'email': email,
-          'type':'local'
+          'type': 'local'
         }, function (err, user) {
           if (err)
             return done(err);
@@ -60,7 +61,7 @@ module.exports = function (passport) {
     function (req, email, password, done) {
       User.findOne({
         'email': email,
-        'type':'local'
+        'type': 'local'
       }, function (err, user) {
         if (err)
           return done(err);
@@ -80,44 +81,80 @@ module.exports = function (passport) {
     },
 
     function (token, refreshToken, profile, done) {
-      // asynchronous
+      
       process.nextTick(function () {
 
-        // find the user in the database based on their facebook id
         User.findOne({
           'profileId': profile.id,
-          'type':'facebook'
+          'type': 'facebook'
         }, function (err, user) {
 
-          // if there is an error, stop everything and return that
-          // ie an error connecting to the database
           if (err)
             return done(err);
 
-          // if the user is found, then log them in
           if (user) {
-            return done(null, user); // user found, return that user
+            return done(null, user);
           } else {
-            // if there is no user found with that facebook id, create them
+            
             var newUser = new User();
             newUser.type = 'facebook';
-            // set all of the facebook information in our user model
+            
             newUser.profileId = profile.id; // set the users facebook id                   
             //newUser.facebook.token = token; // we will save the token that facebook provides to the user                    
             //newUser.facebook.name = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
             console.log(profile);
             newUser.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first
 
-            // save our user to the database
             newUser.save(function (err) {
               if (err)
                 throw err;
 
-              // if successful, return the new user
               return done(null, newUser);
             });
           }
 
+        });
+      });
+    }));
+
+  passport.use(new TwitterStrategy({
+      consumerKey: config.twitterAuth.consumerKey,
+      consumerSecret: config.twitterAuth.consumerSecret,
+      callbackURL: config.twitterAuth.callbackURL
+    },
+    function (token, tokenSecret, profile, done) {
+
+      process.nextTick(function () {
+
+        User.findOne({
+          'profileId': profile.id,
+          'type': 'twitter'
+        }, function (err, user) {
+
+          if (err)
+            return done(err);
+
+          if (user) {
+            return done(null, user); // user found, return that user
+          } else {
+          
+            var newUser = new User();
+
+            console.log(profile);
+
+            newUser.profileId = profile.id;
+            newUser.type = 'twitter';
+            //newUser.twitter.token = token;
+            //newUser.twitter.username = profile.username;
+            //newUser.twitter.displayName = profile.displayName;
+
+            // save our user into the database
+            newUser.save(function (err) {
+              if (err)
+                throw err;
+              return done(null, newUser);
+            });
+          }
         });
       });
     }));

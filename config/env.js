@@ -9,8 +9,14 @@ module.exports = {
   'smtp_from': process.env.SMTP_FROM,
 
   'facebookAuth': {
-    'clientID': '237210096623804', 
-    'clientSecret': 'ad1528174b22338906519b0cb7d2351b', 
-    'callbackURL': 'http://localhost:3000/auth/facebook/callback'
-  }
+    'clientID': process.env.FB_CLIENT_ID,
+    'clientSecret': process.env.FB_SECRET,
+    'callbackURL': process.env.FB_CALLBACK_URL
+  },
+
+  'twitterAuth': {
+    'consumerKey': process.env.TW_CONSUMER_KEY,
+    'consumerSecret': process.env.TW_CONSUMER_SECRET,
+    'callbackURL': process.env.TW_CALLBACK_URL
+  },
 };

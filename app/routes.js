@@ -56,12 +56,20 @@ module.exports = function (app, passport) {
     scope: 'email'
   }));
 
-  // handle the callback after facebook has authenticated the user
   app.get('/auth/facebook/callback',
     passport.authenticate('facebook', {
       successRedirect: '/account',
       failureRedirect: '/'
     }));
+
+  app.get('/auth/twitter', passport.authenticate('twitter'));
+
+  app.get('/auth/twitter/callback',
+    passport.authenticate('twitter', {
+      successRedirect: '/account',
+      failureRedirect: '/'
+    }));
+
 
   app.get('/logout', function (req, res) {
     req.logout();
