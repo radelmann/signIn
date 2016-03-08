@@ -106,7 +106,7 @@ module.exports = function (passport) {
               var newUser = new User();
 
               newUser.type = 'facebook';
-              newUser.profileId = profile.id; // set facebook id                   
+              newUser.profileId = profile.id;                
               newUser.name = profile.displayName;
               newUser.email = profile.emails[0].value;
 
@@ -144,12 +144,12 @@ module.exports = function (passport) {
             } else {
 
               var newUser = new User();
-              // console.log(profile);
-              newUser.profileId = profile.id;
+            
+              newUser.profileId = profile.id; 
               newUser.type = 'twitter';
               newUser.name = profile.displayName;
               newUser.email = '';  
-              // save our user into the database
+              
               newUser.save(function (err, saved) {
                 if (err) {
                   done(err);

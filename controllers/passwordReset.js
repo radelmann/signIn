@@ -3,105 +3,98 @@ var crypto = require('crypto');
 var User = require('../models/user.js');
 var mail = require('../config/mail.js');
 
+var Q = require('q');
+var getToken = Q.denodeify(crypto.randomBytes);
+
+var token;
+
 module.exports.forgot = {
   post: function (req, res, next) {
-    async.waterfall([
-      function (done) {
-        crypto.randomBytes(20, function (err, buf) {
-          var token = buf.toString('hex');
-          done(err, token);
-        });
-      },
-      function (token, done) {
-        User.findOne({
+    getToken(20)
+      .then(function (buffer) {
+        token = buffer.toString('hex');
+        console.log(token);
+        return User.findOne({
           email: req.body.email,
           type: 'local'
-        }, function (err, user) {
-          if (!user) {
-            req.flash('message', 'No account with that email address exists.');
-            return res.redirect('/forgot');
-          }
-
+        });
+      })
+      .then(function (user) {
+        if (!user) {
+          req.flash('message', 'No account with that email address exists.');
+          res.redirect('/forgot');
+        } else {
           user.resetPasswordToken = token;
           user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-          user.save(function (err) {
-            done(err, token, user);
-          });
-        });
-      },
-      function (token, user, done) {
-        mail.sendForgot(user.email, req.headers.host, token, function (err) {
+          return user.save();
+        }
+      })
+      .then(function (user) {
+        mail.sendForgot(user.email, req.headers.host, token, function (err, results) {
           req.flash('message', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-          done(err);
+          res.redirect('/forgot');
         });
-      }
-    ], function (err) {
-      if (err) {
-        return next(err);
-      }
-
-      res.redirect('/forgot');
-    });
+      })
+      .catch(function (err) {
+        next(err);
+      });
   }
 };
 
 module.exports.reset = {
   get: function (req, res, next) {
     User.findOne({
-      resetPasswordToken: req.params.token,
-      resetPasswordExpires: {
-        $gt: Date.now()
-      }
-    }, function (err, user) {
-      if (!user) {
-        req.flash('message', 'Password reset token is invalid or has expired.');
-        return res.redirect('/forgot');
-      }
-      res.render('reset.ejs', {
-        user: req.user,
-        message: req.flash('message')
+        resetPasswordToken: req.params.token,
+        resetPasswordExpires: {
+          $gt: Date.now()
+        }
+      })
+      .then(function (user) {
+        if (!user) {
+          req.flash('message', 'Password reset token is invalid or has expired.');
+          return res.redirect('/forgot');
+        }
+        res.render('reset.ejs', {
+          user: req.user,
+          message: req.flash('message')
+        });
+      }, function (err) {
+        next(err);
       });
-    });
   },
 
-  post: function (req, res) {
-    async.waterfall([
-      function (done) {
-        User.findOne({
-          resetPasswordToken: req.params.token,
-          resetPasswordExpires: {
-            $gt: Date.now()
-          }
-        }, function (err, user) {
-          if (!user) {
-            req.flash('message', 'Password reset token is invalid or has expired.');
-            return res.redirect('back');
-          }
+  post: function (req, res, next) {
+    User.findOne({
+        resetPasswordToken: req.params.token,
+        resetPasswordExpires: {
+          $gt: Date.now()
+        }
+      })
+      .then(function (user) {
+        if (!user) {
+          req.flash('message', 'Password reset token is invalid or has expired.');
+          return res.redirect('back');
+        }
 
-          user.password = user.generateHash(req.body.password);
-          user.resetPasswordToken = undefined;
-          user.resetPasswordExpires = undefined;
+        user.password = user.generateHash(req.body.password);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
 
-          user.save(function (err) {
-            req.logIn(user, function (err) {
-              done(err, user);
-            });
+        user.save(function (err, saved) {
+          if (err) {
+            next(err);
+          }
+          mail.sendReset(user.email, function (err, results) {
+            if (err) {
+              next(err);
+            }
+            req.flash('message', 'Success! Your password has been changed.');
+            return res.redirect('/forgot');
           });
         });
-      },
-      function (user, done) {
-        mail.sendReset(user.email, function (err, results) {
-          req.flash('message', 'Success! Your password has been changed.');
-          return done(err);
-        });
-      }
-    ], function (err) {
-      if (err) {
-        return next(err);
-      }
-
-      res.redirect('/reset');
-    });
+      }, function (err) {
+        console.log(err);
+        next(err);
+      });
   }
 };
