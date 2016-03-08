@@ -1,5 +1,6 @@
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/users.js');
+var mail = require('../config/mail.js');
 
 module.exports = function (passport) {
   passport.serializeUser(function (user, done) {
@@ -39,6 +40,7 @@ module.exports = function (passport) {
               if (err)
                 throw err;
               //to do - send welcome email
+              mail.sendWelcome(newUser.email);
               return done(null, newUser);
             });
           }
