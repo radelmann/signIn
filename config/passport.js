@@ -45,7 +45,7 @@ module.exports = function (passport) {
                 }
                 //send welcome email
                 mail.sendWelcome(saved.email, saved.name, function (err) {
-                  return done(err, newUser);
+                  return done(err, saved);
                 });
               });
 
@@ -106,7 +106,7 @@ module.exports = function (passport) {
               var newUser = new User();
 
               newUser.type = 'facebook';
-              newUser.profileId = profile.id;                
+              newUser.profileId = profile.id;
               newUser.name = profile.displayName;
               newUser.email = profile.emails[0].value;
 
@@ -115,7 +115,10 @@ module.exports = function (passport) {
                   done(err);
                 }
 
-                return done(null, saved);
+                //send welcome email
+                mail.sendWelcome(saved.email, saved.name, function (err) {
+                  return done(err, saved);
+                });
               });
             }
           }, function (err) {
@@ -144,17 +147,18 @@ module.exports = function (passport) {
             } else {
 
               var newUser = new User();
-            
-              newUser.profileId = profile.id; 
+
+              newUser.profileId = profile.id;
               newUser.type = 'twitter';
               newUser.name = profile.displayName;
-              newUser.email = '';  
-              
+              newUser.email = '';
+
               newUser.save(function (err, saved) {
                 if (err) {
                   done(err);
                 }
-                return done(null, saved);
+                //cannot send welcome email since twitter does not return it
+                return done(err, saved);
               });
             }
           }, function (err) {
