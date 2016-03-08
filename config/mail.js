@@ -1,60 +1,64 @@
 var config = require('./env.js');
+var mailer = require('mailer');
+var nodemailer = require('nodemailer');
 
-var mailer = require("mailer");
 
-module.exports.sendWelcome = function (to, cb) {
-  mailer.send({
+var sendMail = function (toEmail, subject, content, cb) {
+  var smtpConfig = {
     host: config.smtp_host,
-    port: 587,
-    to: to,
-    from: config.smtp_from,
-    subject: "Welcome to signIn",
-    body: "Welcome to signIn!",
-    authentication: "login",
-    username: config.smtp_user,
-    password: config.smtp_password
-  }, function (err, result) {
-    if (err) {
-      console.log(err);
+    port: config.smtp_port,
+    secure: false, // use SSL
+    auth: {
+      user: config.smtp_user,
+      pass: config.smtp_password
     }
+  };
+
+  var mailData = {
+    from: config.smtp_from,
+    subject: subject,
+    to: toEmail,
+    html: content
+  };
+
+  var transporter = nodemailer.createTransport(smtpConfig);
+
+  transporter.sendMail(mailData, function (err, result) {
+    cb(err, result);
   });
 }
 
-module.exports.sendForgot = function (req, to, token, cb) {
-  var body = 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-    'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-    '<a href="http://' + req.headers.host + '/reset/' + token + '>Click here to reset your password</a>.\n\n' +
-    'If you did not request this, please ignore this email and your password will remain unchanged.\n';
+module.exports.sendWelcome = function (toEmail, name, cb) {
+  var subject = 'Welcome to signIn!';
 
-  mailer.send({
-    host: config.smtp_host,
-    port: 587,
-    to: to,
-    from: config.smtp_from,
-    subject: "signIn - Forgot Password",
-    body: body,
-    authentication: "login",
-    username: config.smtp_user,
-    password: config.smtp_password
-  }, function (err, result) {
-    cb(err, result);
-  });
+  var content = ['Hi ' + name + ' ,',
+    'Your signIn account is now active.',
+    'Thank you for registering.',
+    'signIn Inc.'
+  ].join('<br><br>');
+
+
+  sendMail(toEmail, subject, content, cb);
+}
+
+module.exports.sendForgot = function (toEmail, host, token, cb) {
+  //req.headers.host
+  var subject = 'signIn - Forgot Password';
+
+  var content = ['You are receiving this because you have requested the reset of the password for your account.',
+    'Please click on the following link, or paste this into your browser to complete the process:',
+    '<a href="http://' + host + '/reset/' + token + '>Click here to reset your password</a>.',
+    'If you did not request this, please ignore this email and your password will remain unchanged.', 'signIn Inc.'
+  ].join('<br><br>');
+
+  sendMail(toEmail, subject, content, cb);
 }
 
 module.exports.sendReset = function (to, cb) {
-  var body = 'This is a confirmation that the password for your account ' + to + ' has just been changed.\n';
+  var subject = 'signIn - Password Change Confirmation';
+  var content = ['This is a confirmation that the password for your email: ' + to + ' has just been changed.',
+    'signIn Inc'
+  ].join('<br><br>');
 
-  mailer.send({
-    host: config.smtp_host,
-    port: 587,
-    to: to,
-    from: config.smtp_from,
-    subject: "Your password has been changed",
-    body: body,
-    authentication: "login",
-    username: config.smtp_user,
-    password: config.smtp_password
-  }, function (err, result) {
-    cb(err, result);
-  });
+  sendMail(toEmail, subject, content, cb);
 }

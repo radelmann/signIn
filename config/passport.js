@@ -31,12 +31,14 @@ module.exports = function (passport) {
           if (err)
             return done(err);
 
+          console.log(user);
           if (user) {
             return done(null, false, req.flash('registerMessage', 'That email is already in use. Please try again.'));
           } else {
 
             var newUser = new User();
 
+            newUser.name = req.body.name;
             newUser.type = 'local';
             newUser.email = email;
             newUser.password = newUser.generateHash(password);
@@ -45,8 +47,9 @@ module.exports = function (passport) {
               if (err)
                 throw err;
               //send welcome email
-              mail.sendWelcome(newUser.email);
-              return done(null, newUser);
+              mail.sendWelcome(newUser.email, newUser.name, function (err) {
+                return done(err, newUser);
+              });
             });
           }
         });
@@ -81,7 +84,7 @@ module.exports = function (passport) {
     },
 
     function (token, refreshToken, profile, done) {
-      
+
       process.nextTick(function () {
 
         User.findOne({
@@ -95,10 +98,10 @@ module.exports = function (passport) {
           if (user) {
             return done(null, user);
           } else {
-            
+
             var newUser = new User();
             newUser.type = 'facebook';
-            
+
             newUser.profileId = profile.id; // set the users facebook id                   
             //newUser.facebook.token = token; // we will save the token that facebook provides to the user                    
             //newUser.facebook.name = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
@@ -137,7 +140,7 @@ module.exports = function (passport) {
           if (user) {
             return done(null, user); // user found, return that user
           } else {
-          
+
             var newUser = new User();
 
             console.log(profile);

@@ -21,20 +21,21 @@
           <div class="well">
             
             <% if (user.type === 'local') { %>
-              <h3><span class="fa fa-user"></span> Local</h3>
+            <h3 class="text-warning"><span class="fa fa-user"></span> Local</h3>
             <% } %>
-
             <% if (user.type === 'facebook') { %>
-              <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
+            <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
             <% } %>
-
             <% if (user.type === 'twitter') { %>
-              <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
+            <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
             <% } %>
-
             <p>
               <strong>id</strong>: <%= user._id %><br>
+              <strong>name</strong>: <%= user.name %><br>
+              
+              <% if (user.email !== '') { %>
               <strong>email</strong>: <%= user.email %><br>
+              <% } %>
             </p>
           </div>
         </div>
