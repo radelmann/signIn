@@ -39,7 +39,7 @@ module.exports = function (passport) {
             newUser.save(function (err) {
               if (err)
                 throw err;
-              //to do - send welcome email
+              //send welcome email
               mail.sendWelcome(newUser.email);
               return done(null, newUser);
             });

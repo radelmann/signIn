@@ -1,3 +1,5 @@
+var password = require('../controllers/passwordReset.js');
+
 var isAuth = function (req, res, next) {
   if (req.isAuthenticated())
     return next();
@@ -22,16 +24,26 @@ module.exports = function (app, passport) {
     });
   });
 
+  app.get('/forgot', function (req, res) {
+    res.render('forgot.ejs', {
+      message: req.flash('message')
+    });
+  });
+
+  app.post('/forgot', password.forgot.post);
+  app.get('/reset/:token', password.reset.get);
+  app.post('/reset/:token', password.reset.post);
+
   app.post('/register', passport.authenticate('local-register', {
-    successRedirect: '/account', 
-    failureRedirect: '/register', 
-    failureFlash: true 
+    successRedirect: '/account',
+    failureRedirect: '/register',
+    failureFlash: true
   }));
 
   app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/account', 
-    failureRedirect: '/login', 
-    failureFlash: true 
+    successRedirect: '/account',
+    failureRedirect: '/login',
+    failureFlash: true
   }));
 
   app.get('/account', isAuth, function (req, res) {
