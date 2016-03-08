@@ -54,7 +54,8 @@ module.exports.reset = {
         }
         res.render('reset.ejs', {
           user: req.user,
-          message: req.flash('message')
+          error: req.flash('error'),
+          info: req.flash('info')
         });
       }, function (err) {
         next(err);
@@ -87,7 +88,7 @@ module.exports.reset = {
               next(err);
             }
             req.flash('info', 'Success! Your password has been changed.');
-            return res.redirect('/forgot');
+            return res.redirect('/login');
           });
         });
       }, function (err) {
