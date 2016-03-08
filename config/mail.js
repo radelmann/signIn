@@ -54,7 +54,7 @@ module.exports.sendForgot = function (toEmail, host, token, cb) {
 module.exports.sendReset = function (toEmail, cb) {
   var subject = 'signIn - Changed Password Confirmation';
 
-  var content = ['This is a confirmation that the password for your email: ' + toEmail + ' has just been changed.',
+  var content = ['This is a confirmation that the password for email: ' + toEmail + ' has just been changed.',
     'signIn Inc'
   ].join('<br><br>');
 

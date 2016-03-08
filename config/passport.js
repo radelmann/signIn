@@ -1,7 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-var User = require('../models/users.js');
+var User = require('../models/user.js');
 var config = require('./env.js');
 var mail = require('../config/mail.js');
 
@@ -25,34 +25,33 @@ module.exports = function (passport) {
       process.nextTick(function () {
 
         User.findOne({
-          'email': email,
-          'type': 'local'
-        }, function (err, user) {
-          if (err)
-            return done(err);
+            'email': email,
+            'type': 'local'
+          })
+          .then(function (user) {
+            if (user) {
+              return done(null, false, req.flash('registerMessage', 'That email is already in use. Please try again.'));
+            } else {
 
-          console.log(user);
-          if (user) {
-            return done(null, false, req.flash('registerMessage', 'That email is already in use. Please try again.'));
-          } else {
+              var newUser = new User();
+              newUser.name = req.body.name;
+              newUser.type = 'local';
+              newUser.email = email;
+              newUser.password = newUser.generateHash(password);
 
-            var newUser = new User();
-
-            newUser.name = req.body.name;
-            newUser.type = 'local';
-            newUser.email = email;
-            newUser.password = newUser.generateHash(password);
-
-            newUser.save(function (err) {
-              if (err)
-                throw err;
-              //send welcome email
-              mail.sendWelcome(newUser.email, newUser.name, function (err) {
-                return done(err, newUser);
+              newUser.save(function (err, saved) {
+                if (err)
+                  done(err);
+                //send welcome email
+                mail.sendWelcome(saved.email, saved.name, function (err) {
+                  return done(err, newUser);
+                });
               });
-            });
-          }
-        });
+
+            }
+          }, function (err) {
+            return done(err);
+          });
       });
     }));
 
@@ -62,18 +61,24 @@ module.exports = function (passport) {
       passReqToCallback: true
     },
     function (req, email, password, done) {
+
       User.findOne({
         'email': email,
         'type': 'local'
-      }, function (err, user) {
-        if (err)
-          return done(err);
-        if (!user)
+      }).then(function (user) {
+        if (!user) {
           return done(null, false, req.flash('loginMessage', 'Email does not exist. Please try again.'));
-        if (!user.validPassword(password))
+        }
+
+        if (!user.validPassword(password)) {
           return done(null, false, req.flash('loginMessage', 'Incorrect password. Please try again.'));
+        }
+
         return done(null, user);
+      }, function (err) {
+        return done(err)
       });
+
     }));
 
   passport.use(new FacebookStrategy({

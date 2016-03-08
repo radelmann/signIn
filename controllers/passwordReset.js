@@ -1,6 +1,6 @@
 var async = require('async');
 var crypto = require('crypto');
-var User = require('../models/users.js');
+var User = require('../models/user.js');
 var mail = require('../config/mail.js');
 
 module.exports.forgot = {
