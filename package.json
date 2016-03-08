@@ -20,6 +20,7 @@
     "express-session": "^1.13.0",
     "mailer": "^0.6.7",
     "method-override": "^2.3.5",
+    "mongo-sanitize": "^1.0.0",
     "mongoose": "^4.4.6",
     "morgan": "^1.7.0",
     "nodemailer": "^2.3.0",

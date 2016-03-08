@@ -1,10 +1,17 @@
 var user = require('../controllers/user.js');
+var sanitize = require('mongo-sanitize');
 
 var isAuth = function (req, res, next) {
   if (req.isAuthenticated())
     return next();
 
   res.redirect('/');
+}
+
+var cleanInput = function(req,res,next) {
+  req.params = sanitize(req.params);
+  req.body = sanitize(req.body);
+  next();
 }
 
 module.exports = function (app, passport) {
@@ -33,17 +40,17 @@ module.exports = function (app, passport) {
     });
   });
 
-  app.post('/forgot', user.forgot.post);
+  app.post('/forgot', cleanInput, user.forgot.post);
   app.get('/reset/:token', user.reset.get);
-  app.post('/reset/:token', user.reset.post);
+  app.post('/reset/:token', cleanInput, user.reset.post);
 
-  app.post('/register', passport.authenticate('local-register', {
+  app.post('/register', cleanInput, passport.authenticate('local-register', {
     successRedirect: '/account',
     failureRedirect: '/register',
     failureFlash: true
   }));
 
-  app.post('/login', passport.authenticate('local-login', {
+  app.post('/login', cleanInput, passport.authenticate('local-login', {
     successRedirect: '/account',
     failureRedirect: '/login',
     failureFlash: true
