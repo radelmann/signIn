@@ -1,13 +1,11 @@
 var config = require('./env.js');
-var mailer = require('mailer');
 var nodemailer = require('nodemailer');
-
 
 var sendMail = function (toEmail, subject, content, cb) {
   var smtpConfig = {
     host: config.smtp_host,
     port: config.smtp_port,
-    secure: false, // use SSL
+    secure: false, 
     auth: {
       user: config.smtp_user,
       pass: config.smtp_password
@@ -42,21 +40,21 @@ module.exports.sendWelcome = function (toEmail, name, cb) {
 }
 
 module.exports.sendForgot = function (toEmail, host, token, cb) {
-  //req.headers.host
   var subject = 'signIn - Forgot Password';
 
   var content = ['You are receiving this because you have requested the reset of the password for your account.',
     'Please click on the following link, or paste this into your browser to complete the process:',
-    '<a href="http://' + host + '/reset/' + token + '>Click here to reset your password</a>.',
+    '<a href="http://' + host + '/reset/' + token + '">Click here to reset your password</a>.',
     'If you did not request this, please ignore this email and your password will remain unchanged.', 'signIn Inc.'
   ].join('<br><br>');
 
   sendMail(toEmail, subject, content, cb);
 }
 
-module.exports.sendReset = function (to, cb) {
-  var subject = 'signIn - Password Change Confirmation';
-  var content = ['This is a confirmation that the password for your email: ' + to + ' has just been changed.',
+module.exports.sendReset = function (toEmail, cb) {
+  var subject = 'signIn - Changed Password Confirmation';
+
+  var content = ['This is a confirmation that the password for your email: ' + toEmail + ' has just been changed.',
     'signIn Inc'
   ].join('<br><br>');
 

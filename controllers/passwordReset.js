@@ -15,7 +15,7 @@ module.exports.forgot = {
       function (token, done) {
         User.findOne({
           email: req.body.email,
-          type:'local'
+          type: 'local'
         }, function (err, user) {
           if (!user) {
             req.flash('message', 'No account with that email address exists.');
@@ -31,7 +31,7 @@ module.exports.forgot = {
         });
       },
       function (token, user, done) {
-        mail.sendForgot(req, user.email, token, function (err) {
+        mail.sendForgot(user.email, req.headers.host, token, function (err) {
           req.flash('message', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
           done(err);
         });
@@ -47,7 +47,7 @@ module.exports.forgot = {
 };
 
 module.exports.reset = {
-  get: function (req, res) {
+  get: function (req, res, next) {
     User.findOne({
       resetPasswordToken: req.params.token,
       resetPasswordExpires: {
@@ -91,13 +91,17 @@ module.exports.reset = {
         });
       },
       function (user, done) {
-        mail.sendReset(user.email, function (err) {
+        mail.sendReset(user.email, function (err, results) {
           req.flash('message', 'Success! Your password has been changed.');
-          return res.redirect('/forgot');
+          return done(err);
         });
       }
     ], function (err) {
-      res.redirect('/');
+      if (err) {
+        return next(err);
+      }
+
+      res.redirect('/reset');
     });
   }
 };
