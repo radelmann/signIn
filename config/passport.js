@@ -30,7 +30,7 @@ module.exports = function (passport) {
           })
           .then(function (user) {
             if (user) {
-              return done(null, false, req.flash('registerMessage', 'That email is already in use. Please try again.'));
+              return done(null, false, req.flash('error', 'That email is already in use. Please try again.'));
             } else {
 
               var newUser = new User();
@@ -69,11 +69,11 @@ module.exports = function (passport) {
         })
         .then(function (user) {
           if (!user) {
-            return done(null, false, req.flash('loginMessage', 'Email does not exist. Please try again.'));
+            return done(null, false, req.flash('error', 'Email does not exist. Please try again.'));
           }
 
           if (!user.validPassword(password)) {
-            return done(null, false, req.flash('loginMessage', 'Incorrect password. Please try again.'));
+            return done(null, false, req.flash('error', 'Incorrect password. Please try again.'));
           }
 
           return done(null, user);

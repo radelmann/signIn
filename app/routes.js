@@ -1,4 +1,4 @@
-var password = require('../controllers/passwordReset.js');
+var user = require('../controllers/user.js');
 
 var isAuth = function (req, res, next) {
   if (req.isAuthenticated())
@@ -14,25 +14,28 @@ module.exports = function (app, passport) {
 
   app.get('/login', function (req, res) {
     res.render('login.ejs', {
-      message: req.flash('loginMessage')
+      error: req.flash('error'),
+      info: req.flash('info')
     });
   });
 
   app.get('/register', function (req, res) {
     res.render('register.ejs', {
-      message: req.flash('registerMessage')
+      error: req.flash('error'),
+      info: req.flash('info')
     });
   });
 
   app.get('/forgot', function (req, res) {
     res.render('forgot.ejs', {
-      message: req.flash('message')
+      error: req.flash('error'),
+      info: req.flash('info')
     });
   });
 
-  app.post('/forgot', password.forgot.post);
-  app.get('/reset/:token', password.reset.get);
-  app.post('/reset/:token', password.reset.post);
+  app.post('/forgot', user.forgot.post);
+  app.get('/reset/:token', user.reset.get);
+  app.post('/reset/:token', user.reset.post);
 
   app.post('/register', passport.authenticate('local-register', {
     successRedirect: '/account',
