@@ -19,4 +19,10 @@ module.exports = {
     'consumerSecret': process.env.TW_CONSUMER_SECRET,
     'callbackURL': process.env.TW_CALLBACK_URL
   },
+
+  'googleAuth': {
+    'clientID': process.env.G_CLIENT_ID,
+    'clientSecret': process.env.G_SECRET,
+    'callbackURL': process.env.G_CALLBACK_URL
+  }
 };

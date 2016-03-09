@@ -1,6 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var User = require('../models/user.js');
 var config = require('./env.js');
 var mail = require('../config/mail.js');
@@ -143,7 +144,7 @@ module.exports = function (passport) {
           })
           .then(function (user) {
             if (user) {
-              return done(null, user); // user found, return that user
+              return done(null, user);
             } else {
 
               var newUser = new User();
@@ -163,6 +164,47 @@ module.exports = function (passport) {
             }
           }, function (err) {
             done(err);
+          });
+
+      });
+    }));
+
+  passport.use(new GoogleStrategy({
+      clientID: config.googleAuth.clientID,
+      clientSecret: config.googleAuth.clientSecret,
+      callbackURL: config.googleAuth.callbackURL,
+    },
+    function (token, refreshToken, profile, done) {
+
+      process.nextTick(function () {
+
+        User.findOne({
+            'profileId': profile.id,
+            'type': 'google'
+          })
+          .then(function (user) {
+            if (user) {
+              return done(null, user);
+            } else {
+
+              var newUser = new User();
+              newUser.profileId = profile.id;
+              newUser.type = 'google';
+              newUser.name = profile.displayName;
+              newUser.email = profile.emails[0].value;
+
+              newUser.save(function (err, saved) {
+                if (err) {
+                  throw err;
+                }
+                //send welcome email
+                mail.sendWelcome(saved.email, saved.name, function (err) {
+                  return done(err, saved);
+                });
+              });
+            }
+          }, function (err) {
+            return done(err);
           });
 
       });

@@ -8,7 +8,7 @@ var isAuth = function (req, res, next) {
   res.redirect('/');
 }
 
-var cleanInput = function(req,res,next) {
+var cleanInput = function (req, res, next) {
   req.params = sanitize(req.params);
   req.body = sanitize(req.body);
   next();
@@ -80,6 +80,15 @@ module.exports = function (app, passport) {
       failureRedirect: '/'
     }));
 
+  app.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+  }));
+
+  app.get('/auth/google/callback',
+    passport.authenticate('google', {
+      successRedirect: '/account',
+      failureRedirect: '/'
+    }));
 
   app.get('/logout', function (req, res) {
     req.logout();
