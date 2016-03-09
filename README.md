@@ -1,5 +1,5 @@
 # signIn
-signIn - local, facebook, and twitter authentication strategies implemented with passport
+signIn - local, facebook, twitter, and google authentication strategies implemented with passport
 
 #Instructions for running locally
 - clone repo
