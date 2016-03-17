@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "async": "^1.5.2",
-    "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.15.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.1",
@@ -28,6 +28,7 @@
     "passport-facebook": "^2.1.0",
     "passport-google-oauth": "^1.0.0",
     "passport-local": "^1.0.0",
-    "passport-twitter": "^1.0.4"
+    "passport-twitter": "^1.0.4",
+    "q": "^1.4.1"
   }
 }
