@@ -9,7 +9,6 @@ var token;
 
 module.exports.email = {
   post: function(req, res, next) {
-    console.log(req.user);
     User.findOne({
         '_id': req.user._id,
       })
