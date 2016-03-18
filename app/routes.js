@@ -1,39 +1,39 @@
 var user = require('../controllers/user.js');
 var sanitize = require('mongo-sanitize');
 
-var isAuth = function (req, res, next) {
+var isAuth = function(req, res, next) {
   if (req.isAuthenticated())
     return next();
 
   res.redirect('/');
 }
 
-var cleanInput = function (req, res, next) {
+var cleanInput = function(req, res, next) {
   req.params = sanitize(req.params);
   req.body = sanitize(req.body);
   next();
 }
 
-module.exports = function (app, passport) {
-  app.get('/', function (req, res) {
+module.exports = function(app, passport) {
+  app.get('/', function(req, res) {
     res.render('index.ejs');
   });
 
-  app.get('/login', function (req, res) {
+  app.get('/login', function(req, res) {
     res.render('login.ejs', {
       error: req.flash('error'),
       info: req.flash('info')
     });
   });
 
-  app.get('/register', function (req, res) {
+  app.get('/register', function(req, res) {
     res.render('register.ejs', {
       error: req.flash('error'),
       info: req.flash('info')
     });
   });
 
-  app.get('/forgot', function (req, res) {
+  app.get('/forgot', function(req, res) {
     res.render('forgot.ejs', {
       error: req.flash('error'),
       info: req.flash('info')
@@ -56,11 +56,15 @@ module.exports = function (app, passport) {
     failureFlash: true
   }));
 
-  app.get('/account', isAuth, function (req, res) {
+  app.get('/account', isAuth, function(req, res) {
     res.render('account.ejs', {
+      error: req.flash('error'),
+      info: req.flash('info'),
       user: req.user
     });
   });
+
+  app.post('/account', isAuth, user.email.post);
 
   app.get('/auth/facebook', passport.authenticate('facebook', {
     scope: 'email'
@@ -90,7 +94,7 @@ module.exports = function (app, passport) {
       failureRedirect: '/'
     }));
 
-  app.get('/logout', function (req, res) {
+  app.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
   });

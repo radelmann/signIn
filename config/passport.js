@@ -132,12 +132,12 @@ module.exports = function (passport) {
   passport.use(new TwitterStrategy({
       consumerKey: config.twitterAuth.consumerKey,
       consumerSecret: config.twitterAuth.consumerSecret,
+      userProfileURL: "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true",
       callbackURL: config.twitterAuth.callbackURL
     },
-    function (token, tokenSecret, profile, done) {
+    function (req, token, tokenSecret, profile, done) {
 
       process.nextTick(function () {
-
         User.findOne({
             'profileId': profile.id,
             'type': 'twitter'
@@ -158,7 +158,7 @@ module.exports = function (passport) {
                 if (err) {
                   done(err);
                 }
-                //cannot send welcome email since twitter does not return it
+                //cannot send welcome email here since twitter does not return it
                 return done(err, saved);
               });
             }

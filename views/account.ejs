@@ -12,9 +12,11 @@
         <h1><span class="fa fa-gear"></span> User Account Page</h1>
       </div>
       <div class="row">
-        
+
         <div class="col-sm-12">
-          <div class="well">
+          <div class="well clearfix">
+            <% include partials/messages %>
+            
             <% if (user.type === 'local') { %>
             <h3 class="text-warning"><span class="fa fa-user"></span> Local</h3>
             <% } %>
@@ -24,11 +26,9 @@
             <% if (user.type === 'twitter') { %>
             <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
             <% } %>
-
             <% if (user.type === 'google') { %>
             <h3 class="text-info"><span class="fa fa-google-plus"></span> Google</h3>
             <% } %>
-
             <p>
               <strong>id</strong>: <%= user._id %><br>
               <strong>name</strong>: <%= user.name %><br>
@@ -36,9 +36,22 @@
               <% if (user.email !== '') { %>
               <strong>email</strong>: <%= user.email %><br>
               <% } %>
+
+              <% if (user.email === '') { %>
+                <div class="alert alert-danger">We currently do not have an email address attached to you account. Please enter one here.</div>  
+                <form class="clearfix" method="post">
+                  <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" name="email" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-lg pull-right">Submit</button>
+                </form>
+              <% }  else { %>
+                <a href="/logout" class="btn btn-primary btn-lg pull-right">Logout</a>
+              <% } %>              
+
             </p>
           </div>
-          <a href="/logout" class="btn btn-primary btn-lg pull-right">Logout</a>
         </div>
       </div>
     </div>
